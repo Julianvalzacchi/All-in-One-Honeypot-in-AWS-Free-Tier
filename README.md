@@ -10,6 +10,8 @@ provide a guide in Spanish describing the process and the scripts and backups of
 
 The honeypot is currently inactive; it was deployed for research only. I observed path traversal, LFI, and brute-force attacks, and captured the commands attackers ran after gaining apparent access.
 
+All the API Keys and passwords where in a file called secret.txt but it's not here.
+
 Many of the services are disabled by default to avoid overloading the CPU. MySQL consumes a large amount of memory but is responsible for storing all the data, so it comes enabled by default and must remain active.
 
 1. Start Nginx with HoneypotWeb
