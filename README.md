@@ -8,6 +8,8 @@
 This set of honeypots was tested on an AWS free tier T2.micro instance with 1 CPU, 1 GB of RAM, and 30 GiB of storage and with a Domain name bought in https://www.namecheap.com although it would be advisable to use one with more resources. In this GitHub repository, I 
 provide a guide in Spanish describing the process and the scripts and backups of the configuration of the honeypots and, below, the steps required to start all the honeypots when the instance boots. You are going to use Cowrie, OpenCanary, Laravel, Grafana, GoAccess, Nginx and Mysql.
 
+The honeypot is currently inactive; it was deployed for research only. I observed path traversal, LFI, and brute-force attacks, and captured the commands attackers ran after gaining apparent access.
+
 Many of the services are disabled by default to avoid overloading the CPU. MySQL consumes a large amount of memory but is responsible for storing all the data, so it comes enabled by default and must remain active.
 
 1. Start Nginx with HoneypotWeb
