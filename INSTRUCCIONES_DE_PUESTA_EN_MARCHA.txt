@@ -1,0 +1,79 @@
+########################################################
+#                                                      #
+#			HoneyPot                       #
+#		     Farmacia Paafin                   #
+#                                                      #
+########################################################
+
+Muchos de los servicios están desactivados por defecto para evitar sobrecargar la CPU. MySQL gasta una gran cantidad de memoria pero es la encargada de almacenar todos los datos por lo que ya viene activo por lo que es imprescindible que este activo.
+
+1. Encender la instancia en AWS
+	1.1 Vamos a https://awsacademy.instructure.com/login/canvas
+	1.2 Nos logeamos como estudiante con el correo "jvalzacchi2001@gmail.com" y como contraseña "Pizzasteve953051!"
+	1.3 Asignaturas -> Contenidos -> Lanzamiento del Laboratorio de AWS Academy.
+	1.4 Hacer click en Start LabStart Lab. El laboratorio se apagará automáticamente tras 4 horas a menos que reiniciemos el tiempo haciendo click nuevamente en Start Lab. 
+	1.5 En caso de querer más información sobre la instancia, haga click en AWS ◯ -> EC2 -> Instancias. Solo le aparecerá una
+
+2. Acceder a la instancia
+	2.1 Copiamos el archivo "Laravel8.pem" en una ruta accesible.
+	2.2 Abrimos una terminal.
+	2.3 Damos permisos al archivo "Laravel8.pem" con "sudo chmod 400 ruta/del/archivo/Laravel8.pem"
+	2.4 Nos conectamos por SSH "ssh -i ruta/del/Laravel8.pem ubuntu@farmaciapaafin.shop -p 8022"
+
+3. Iniciar Nginx con el HoneypotWeb
+	3.1 sudo systemctl start nginx.
+	3.2 sudo systemctl status nginx (comprobar que este en marcha).
+	3.3 Funciona correctamente si aparece una aplicación web al buscar el nombre de dominio "farmaciapaafin.shop" en el navegador.
+
+4. Iniciar Cowrie (Honeypot SSH y TELNET)
+	4.1 Redireccionar las conexiones 
+		sudo iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222
+		sudo iptables -t nat -A PREROUTING -p tcp --dport 23 -j REDIRECT --to-port 2223
+	4.2 sudo su - cowrie
+	4.3 cd /home/cowrie/cowrie/cowrie
+	4.4 source cowrie-env/bin/activate
+	4.5 bin/cowrie start
+	4.6 bin/cowrie stop (Detener Cowrie)
+	4.7 deactivate (Salir del entorno virtual)
+
+5. Iniciar OpenCanary (Honeypot FTP y MysSQL)
+	5.1 ~/.local/bin/opencanaryd --start
+	5.2 ~/.local/bin/opencanaryd --stop (Detener OpenCanary)
+	5.3 En caso de querer activar el módulo que activa el honeypot de MySQL, será necesario cambiar "mysql.enabled": false," a "mysql.enabled": true," en el archivo /etc/opencanaryd/opencanary.conf. Iniciar de nuevo con el paso 5.1 el honeypot y activará ambos módulos.
+
+VISUALIZAR RESULTADOS
+
+Es altamente recomendable que no se tengan activos todos los honeypot mientras se usan las herramientas de visualización ya que puede provocar una sobrecarga de la memoria y la CPU ralentizando enormemente la máquina.
+ 
+6. Iniciar Grafana
+	6.1 sudo systemctl start grafana
+	6.2 Accedemos buscando en el navegador "farmaciapaafin.shop:3000"
+	6.4 Credenciales necesarios: Usuario -> admin y Contraseña-> Pizzasteve953051!
+	6.3 Dashboards -> Cowrie
+
+7. Actualizar mapas de Grafana (Es necesario actualizarlos con los siguientes scripts)
+	7.1 sudo ./open_ftp.sh
+	7.2 sudo ./actualizar_mapa.sh
+
+8. Iniciamos y creamos un informe con GoAccess
+
+	8.1 Introducir el siguiente comando, en caso de no hacerlo, seguramente pueda ver la gráficas con el paso 8.2 pero no se actualizará al recargar la página:
+
+sudo goaccess /var/log/nginx/access.log \
+  -o /home/ubuntu/laravel/public/nginx_dashboard.html \
+  --log-format=COMBINED \
+  --real-time-html \
+  --port=7890 \
+  --addr=127.0.0.1 \
+  --ws-url=wss://farmaciapaafin.shop/goaccess_ws \
+  --daemonize
+
+	8.2 Acceder mediante navegador "https://farmaciapaafin.shop/nginx_dashboard.html"
+	8.3 F5 para actualizar las gráficas
+
+9. Obtener información de una IP en concreto
+	9.1 sudo ./open_ftp.sh
+	9.2 Introduzca la IP a investigar
+
+10. Verificar archivos sospechosos con la API de Virus Total
+	10.1 python3 virus_total.sh
